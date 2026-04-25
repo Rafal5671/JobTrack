@@ -1,0 +1,13 @@
+# Go
+jobtrack-api/tmp/
+jobtrack-api/*.exe
+
+# Node
+node_modules/
+jobtrack-client/dist/
+
+# Env – nigdy nie commituj!
+.env
+
+# OS
+.DS_Store
