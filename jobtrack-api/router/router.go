@@ -20,6 +20,7 @@ func Setup(jwtSecret string, db *gorm.DB) *gin.Engine {
 	authHandler := handlers.NewAuthHandler(db, jwtSecret)
 	applicationHandler := handlers.NewApplicationHandler(db)
 	contactHandler := handlers.NewContactHandler(db)
+	noteHandler := handlers.NewNoteHandler(db)
 
 	api := r.Group("/api")
 	{
@@ -46,6 +47,12 @@ func Setup(jwtSecret string, db *gorm.DB) *gin.Engine {
 				applications.PUT("/:id", applicationHandler.Update)
 				applications.PATCH("/:id/status", applicationHandler.UpdateStatus)
 				applications.DELETE("/:id", applicationHandler.Delete)
+
+				// Note routes – nested under applications
+				applications.GET("/:id/notes", noteHandler.GetAll)
+				applications.POST("/:id/notes", noteHandler.Create)
+				applications.PUT("/:id/notes/:noteID", noteHandler.Update)
+				applications.DELETE("/:id/notes/:noteID", noteHandler.Delete)
 			}
 
 			// Contact routes
