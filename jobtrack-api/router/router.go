@@ -22,6 +22,7 @@ func Setup(jwtSecret string, db *gorm.DB) *gin.Engine {
 	contactHandler := handlers.NewContactHandler(db)
 	noteHandler := handlers.NewNoteHandler(db)
 	reminderHandler := handlers.NewReminderHandler(db)
+	statsHandler := handlers.NewStatsHandler(db)
 
 	api := r.Group("/api")
 	{
@@ -73,8 +74,10 @@ func Setup(jwtSecret string, db *gorm.DB) *gin.Engine {
 				contacts.POST("/:id/applications/:applicationID", contactHandler.LinkToApplication)
 				contacts.DELETE("/:id/applications/:applicationID", contactHandler.UnlinkFromApplication)
 			}
-
 		}
+
+		// Stats routes
+		protected.GET("/stats", statsHandler.GetStats)
 	}
 
 	return r
