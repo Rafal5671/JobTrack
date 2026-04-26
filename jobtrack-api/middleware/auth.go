@@ -1,3 +1,4 @@
+// Package middleware contains Gin middleware functions for JobTrack.
 package middleware
 
 import (
@@ -10,6 +11,9 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
+// AuthRequired returns a Gin middleware that validates the JWT token
+// from the Authorization header and injects the userID into the request context.
+// Aborts with 401 if the token is missing, malformed or expired.
 func AuthRequired(jwtSecret string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")

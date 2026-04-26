@@ -1,3 +1,4 @@
+// Package models defines GORM database models for JobTrack.
 package models
 
 import (
@@ -6,6 +7,8 @@ import (
 	"gorm.io/gorm"
 )
 
+// User represents a registered account in the system.
+// The Password field is excluded from JSON responses to prevent leaking credentials.
 type User struct {
 	ID        uint           `gorm:"primaryKey" json:"id"`
 	Email     string         `gorm:"uniqueIndex;not null" json:"email"`

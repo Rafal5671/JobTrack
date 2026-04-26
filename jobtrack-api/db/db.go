@@ -1,3 +1,4 @@
+// Package db handles database connection and schema migration.
 package db
 
 import (
@@ -12,8 +13,12 @@ import (
 	"gorm.io/gorm/logger"
 )
 
+// DB is the global database instance shared across the application.
 var DB *gorm.DB
 
+// Connect establishes a connection to the PostgreSQL database using
+// the provided configuration and runs AutoMigrate for all models.
+// Terminates the application if the connection or migration fails.
 func Connect(cfg *config.Config) *gorm.DB {
 	dsn := fmt.Sprintf(
 		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",

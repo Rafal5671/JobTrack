@@ -1,3 +1,5 @@
+// JobTrack API – backend service for tracking job applications.
+// Starts the Gin HTTP server and a background reminder worker.
 package main
 
 import (
@@ -10,12 +12,16 @@ import (
 )
 
 func main() {
+	// Load configuration from .env or system environment.
 	cfg := config.Load()
 
+	// Connect to PostgreSQL and run migrations.
 	database := db.Connect(cfg)
 
+	// Start the reminder worker in a separate goroutine.
 	go worker.StartReminderWorker(database)
 
+	// Set up Gin router with all routes and middleware.
 	r := router.Setup(cfg, database)
 
 	log.Printf("Server starting on port %s", cfg.Port)

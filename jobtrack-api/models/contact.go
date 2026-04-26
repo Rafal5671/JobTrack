@@ -6,6 +6,8 @@ import (
 	"gorm.io/gorm"
 )
 
+// Contact represents an HR or recruiter contact associated with the user.
+// A contact can be linked to multiple applications via a many-to-many relation.
 type Contact struct {
 	ID        uint           `gorm:"primaryKey" json:"id"`
 	UserID    uint           `gorm:"not null;index" json:"user_id"`

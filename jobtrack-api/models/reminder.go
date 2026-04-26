@@ -6,6 +6,9 @@ import (
 	"gorm.io/gorm"
 )
 
+// Reminder represents a scheduled alert for a job application event,
+// such as a follow-up deadline or an interview time.
+// The Sent field is set to true by the background worker after the email is dispatched.
 type Reminder struct {
 	ID            uint           `gorm:"primaryKey" json:"id"`
 	ApplicationID uint           `gorm:"not null;index" json:"application_id"`
