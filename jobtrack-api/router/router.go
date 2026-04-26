@@ -18,6 +18,7 @@ func Setup(jwtSecret string, db *gorm.DB) *gin.Engine {
 	r.Use(middleware.CORS())
 
 	authHandler := handlers.NewAuthHandler(db, jwtSecret)
+	applicationHandler := handlers.NewApplicationHandler(db)
 
 	api := r.Group("/api")
 	{
@@ -29,6 +30,22 @@ func Setup(jwtSecret string, db *gorm.DB) *gin.Engine {
 
 			// Protected – requires valid JWT
 			auth.GET("/me", middleware.AuthRequired(jwtSecret), authHandler.Me)
+		}
+
+		// Protected routes – require valid JWT
+		protected := api.Group("/")
+		protected.Use(middleware.AuthRequired(jwtSecret))
+		{
+			// Application routes
+			applications := protected.Group("/applications")
+			{
+				applications.GET("", applicationHandler.GetAll)
+				applications.GET("/:id", applicationHandler.GetByID)
+				applications.POST("", applicationHandler.Create)
+				applications.PUT("/:id", applicationHandler.Update)
+				applications.PATCH("/:id/status", applicationHandler.UpdateStatus)
+				applications.DELETE("/:id", applicationHandler.Delete)
+			}
 		}
 	}
 
