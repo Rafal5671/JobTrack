@@ -25,7 +25,7 @@ func NewApplicationHandler(db *gorm.DB) *ApplicationHandler {
 	}
 }
 
-// GetAll godoc
+// GetAll
 // GET /api/applications
 // Returns all job applications for the authenticated user.
 func (h *ApplicationHandler) GetAll(c *gin.Context) {
@@ -40,7 +40,7 @@ func (h *ApplicationHandler) GetAll(c *gin.Context) {
 	utils.Success(c, http.StatusOK, applications)
 }
 
-// GetByID godoc
+// GetByID
 // GET /api/applications/:id
 // Returns a single application with preloaded notes, contacts and reminders.
 func (h *ApplicationHandler) GetByID(c *gin.Context) {
@@ -60,7 +60,7 @@ func (h *ApplicationHandler) GetByID(c *gin.Context) {
 	utils.Success(c, http.StatusOK, application)
 }
 
-// Create godoc
+// Create
 // POST /api/applications
 // Creates a new job application for the authenticated user.
 func (h *ApplicationHandler) Create(c *gin.Context) {
@@ -81,7 +81,7 @@ func (h *ApplicationHandler) Create(c *gin.Context) {
 	utils.SuccessMessage(c, http.StatusCreated, application, "Application created successfully")
 }
 
-// Update godoc
+// Update
 // PUT /api/applications/:id
 // Updates an existing application. Only provided fields are changed.
 func (h *ApplicationHandler) Update(c *gin.Context) {
@@ -107,7 +107,7 @@ func (h *ApplicationHandler) Update(c *gin.Context) {
 	utils.Success(c, http.StatusOK, application)
 }
 
-// UpdateStatus godoc
+// UpdateStatus
 // PATCH /api/applications/:id/status
 // Updates only the status field. Used by the kanban board drag and drop.
 func (h *ApplicationHandler) UpdateStatus(c *gin.Context) {
@@ -135,7 +135,7 @@ func (h *ApplicationHandler) UpdateStatus(c *gin.Context) {
 	utils.Success(c, http.StatusOK, application)
 }
 
-// Delete godoc
+// Delete
 // DELETE /api/applications/:id
 // Soft-deletes an application by ID.
 func (h *ApplicationHandler) Delete(c *gin.Context) {

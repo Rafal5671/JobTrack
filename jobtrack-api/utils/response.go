@@ -1,7 +1,12 @@
 // Package utils provides shared helper functions used across handlers.
 package utils
 
-import "github.com/gin-gonic/gin"
+import (
+	"net/http"
+	"strconv"
+
+	"github.com/gin-gonic/gin"
+)
 
 // SuccessResponse is the standard envelope for successful API responses.
 type SuccessResponse struct {
@@ -27,4 +32,15 @@ func SuccessMessage(c *gin.Context, status int, data any, message string) {
 // Error writes a JSON error response with the given status code and message.
 func Error(c *gin.Context, status int, message string) {
 	c.JSON(status, ErrorResponse{Error: message})
+}
+
+// parseParamID extracts and validates a named URL parameter as a uint.
+// Writes a 400 error response and returns an error if the value is invalid.
+func ParseParamID(c *gin.Context, param string) (uint, error) {
+	id, err := strconv.ParseUint(c.Param(param), 10, 32)
+	if err != nil {
+		Error(c, http.StatusBadRequest, "Invalid "+param)
+		return 0, err
+	}
+	return uint(id), nil
 }

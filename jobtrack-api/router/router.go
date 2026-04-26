@@ -19,6 +19,7 @@ func Setup(jwtSecret string, db *gorm.DB) *gin.Engine {
 
 	authHandler := handlers.NewAuthHandler(db, jwtSecret)
 	applicationHandler := handlers.NewApplicationHandler(db)
+	contactHandler := handlers.NewContactHandler(db)
 
 	api := r.Group("/api")
 	{
@@ -46,6 +47,19 @@ func Setup(jwtSecret string, db *gorm.DB) *gin.Engine {
 				applications.PATCH("/:id/status", applicationHandler.UpdateStatus)
 				applications.DELETE("/:id", applicationHandler.Delete)
 			}
+
+			// Contact routes
+			contacts := protected.Group("/contacts")
+			{
+				contacts.GET("", contactHandler.GetAll)
+				contacts.GET("/:id", contactHandler.GetByID)
+				contacts.POST("", contactHandler.Create)
+				contacts.PUT("/:id", contactHandler.Update)
+				contacts.DELETE("/:id", contactHandler.Delete)
+				contacts.POST("/:id/applications/:applicationID", contactHandler.LinkToApplication)
+				contacts.DELETE("/:id/applications/:applicationID", contactHandler.UnlinkFromApplication)
+			}
+
 		}
 	}
 
