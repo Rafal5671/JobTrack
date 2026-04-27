@@ -1,1 +1,29 @@
 @import "tailwindcss";
+
+@theme {
+    /* Brand – violet */
+    --color-brand-50: oklch(0.97 0.02 277);
+    --color-brand-100: oklch(0.93 0.05 277);
+    --color-brand-200: oklch(0.87 0.09 277);
+    --color-brand-500: oklch(0.6 0.19 277);
+    --color-brand-600: oklch(0.52 0.21 277);
+    --color-brand-700: oklch(0.44 0.19 277);
+
+    /* Status colors */
+    --color-status-saved: oklch(0.92 0.01 260);
+    --color-status-applied: oklch(0.92 0.05 230);
+    --color-status-screening: oklch(0.93 0.07 250);
+    --color-status-interview: oklch(0.93 0.05 277);
+    --color-status-offer: oklch(0.93 0.08 160);
+    --color-status-rejected: oklch(0.93 0.05 25);
+    --color-status-withdrawn: oklch(0.92 0.01 260);
+
+    /* Surface */
+    --color-surface: oklch(1 0 0);
+    --color-surface-secondary: oklch(0.98 0 0);
+    --color-surface-tertiary: oklch(0.96 0 0);
+
+    /* Border */
+    --color-border: oklch(0.92 0 0);
+    --color-border-strong: oklch(0.85 0 0);
+}
