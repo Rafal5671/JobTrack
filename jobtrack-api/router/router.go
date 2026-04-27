@@ -3,6 +3,7 @@
 package router
 
 import (
+	"jobtrack-api/config"
 	"jobtrack-api/handlers"
 	"jobtrack-api/middleware"
 
@@ -12,12 +13,12 @@ import (
 
 // Setup creates and returns a configured Gin engine with all routes registered.
 // All protected routes require a valid JWT token via the AuthRequired middleware.
-func Setup(jwtSecret string, db *gorm.DB) *gin.Engine {
+func Setup(cfg *config.Config, db *gorm.DB) *gin.Engine {
 	r := gin.Default()
 
 	r.Use(middleware.CORS())
 
-	authHandler := handlers.NewAuthHandler(db, jwtSecret)
+	authHandler := handlers.NewAuthHandler(db, cfg.JWTSecret)
 	applicationHandler := handlers.NewApplicationHandler(db)
 	contactHandler := handlers.NewContactHandler(db)
 	noteHandler := handlers.NewNoteHandler(db)
@@ -31,14 +32,12 @@ func Setup(jwtSecret string, db *gorm.DB) *gin.Engine {
 		{
 			auth.POST("/register", authHandler.Register)
 			auth.POST("/login", authHandler.Login)
-
-			// Protected – requires valid JWT
-			auth.GET("/me", middleware.AuthRequired(jwtSecret), authHandler.Me)
+			auth.GET("/me", middleware.AuthRequired(cfg.JWTSecret), authHandler.Me)
 		}
 
 		// Protected routes – require valid JWT
 		protected := api.Group("/")
-		protected.Use(middleware.AuthRequired(jwtSecret))
+		protected.Use(middleware.AuthRequired(cfg.JWTSecret))
 		{
 			// Application routes
 			applications := protected.Group("/applications")
@@ -74,10 +73,10 @@ func Setup(jwtSecret string, db *gorm.DB) *gin.Engine {
 				contacts.POST("/:id/applications/:applicationID", contactHandler.LinkToApplication)
 				contacts.DELETE("/:id/applications/:applicationID", contactHandler.UnlinkFromApplication)
 			}
-		}
 
-		// Stats routes
-		protected.GET("/stats", statsHandler.GetStats)
+			// Stats routes
+			protected.GET("/stats", statsHandler.GetStats)
+		}
 	}
 
 	return r
