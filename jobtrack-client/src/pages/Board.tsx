@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { DragDropContext, type DropResult } from "@hello-pangea/dnd";
 import { IconPlus, IconLoader2 } from "@tabler/icons-react";
 import {
   useApplications,
   useCreateApplication,
   useDeleteApplication,
+  useUpdateApplicationStatus,
 } from "../hooks/useApplication";
 import KanbanColumn from "../components/Board/KanbanColumn";
 import { COLUMN_CONFIG, COLUMN_ORDER } from "../constants/board";
@@ -20,6 +22,7 @@ export default function BoardPage() {
   const { data: applications, isLoading, isError } = useApplications();
   const createApplication = useCreateApplication();
   const deleteApplication = useDeleteApplication();
+  const updateStatus = useUpdateApplicationStatus();
 
   const [modalOpen, setModalOpen] = useState(false);
   const [defaultStatus, setDefaultStatus] =
@@ -33,6 +36,22 @@ export default function BoardPage() {
     },
     {} as Record<ApplicationStatus, Application[]>,
   );
+
+  // Called when a card is dropped in a new column.
+  const handleDragEnd = (result: DropResult) => {
+    const { draggableId, destination } = result;
+
+    // Dropped outside a column or in the same column – do nothing.
+    if (!destination) return;
+
+    const newStatus = destination.droppableId as ApplicationStatus;
+    const appId = parseInt(draggableId);
+
+    const app = applications?.find((a) => a.id === appId);
+    if (!app || app.status === newStatus) return;
+
+    updateStatus.mutate({ id: appId, status: newStatus });
+  };
 
   const handleAddClick = (status: ApplicationStatus) => {
     setDefaultStatus(status);
@@ -105,18 +124,20 @@ export default function BoardPage() {
 
       {/* Kanban board */}
       <div className="flex-1 overflow-x-auto p-4">
-        <div className="grid grid-cols-7 gap-3 h-full min-w-275">
-          {COLUMN_ORDER.map((status) => (
-            <KanbanColumn
-              key={status}
-              status={status}
-              applications={grouped[status]}
-              onAddClick={() => handleAddClick(status)}
-              onCardClick={handleCardClick}
-              onDeleteClick={handleDeleteClick}
-            />
-          ))}
-        </div>
+        <DragDropContext onDragEnd={handleDragEnd}>
+          <div className="grid grid-cols-7 gap-3 h-full min-w-275">
+            {COLUMN_ORDER.map((status) => (
+              <KanbanColumn
+                key={status}
+                status={status}
+                applications={grouped[status]}
+                onAddClick={() => handleAddClick(status)}
+                onCardClick={handleCardClick}
+                onDeleteClick={handleDeleteClick}
+              />
+            ))}
+          </div>
+        </DragDropContext>
       </div>
 
       {/* Add application modal */}

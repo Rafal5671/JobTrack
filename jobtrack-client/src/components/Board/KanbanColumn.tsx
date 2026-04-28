@@ -1,5 +1,6 @@
 import type { Application, ApplicationStatus } from "../../types";
 import KanbanCard from "./KanbanCard";
+import { Droppable } from "@hello-pangea/dnd";
 import { IconPlus } from "@tabler/icons-react";
 import { COLUMN_CONFIG } from "../../constants/board";
 
@@ -44,16 +45,28 @@ export default function KanbanColumn({
       </div>
 
       {/* Cards */}
-      <div className="flex flex-col gap-2 flex-1">
-        {applications.map((app) => (
-          <KanbanCard
-            key={app.id}
-            application={app}
-            onClick={() => onCardClick(app)}
-            onDelete={() => onDeleteClick(app.id)}
-          />
-        ))}
-      </div>
+      <Droppable droppableId={status}>
+        {(provided, snapshot) => (
+          <div
+            ref={provided.innerRef}
+            {...provided.droppableProps}
+            className={`flex flex-col gap-2 flex-1 rounded-lg transition-colors p-1 ${
+              snapshot.isDraggingOver ? "bg-brand-50" : ""
+            }`}
+          >
+            {applications.map((app, index) => (
+              <KanbanCard
+                key={app.id}
+                index={index}
+                application={app}
+                onClick={() => onCardClick(app)}
+                onDelete={() => onDeleteClick(app.id)}
+              />
+            ))}
+            {provided.placeholder}
+          </div>
+        )}
+      </Droppable>
     </div>
   );
 }
