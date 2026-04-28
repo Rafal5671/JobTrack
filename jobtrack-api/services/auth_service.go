@@ -26,7 +26,7 @@ func NewAuthService(db *gorm.DB, jwtSecret string) *AuthService {
 
 // Register creates a new user account after validating that the email is not taken.
 // The password is hashed with bcrypt before being stored.
-func (s *AuthService) Register(name, email, password string) (*models.User, error) {
+func (s *AuthService) Register(firstName, lastName, email, password string) (*models.User, error) {
 	var existing models.User
 	if err := s.db.Where("email = ?", email).First(&existing).Error; err == nil {
 		return nil, errors.New("email already in use")
@@ -38,9 +38,10 @@ func (s *AuthService) Register(name, email, password string) (*models.User, erro
 	}
 
 	user := &models.User{
-		Name:     name,
-		Email:    email,
-		Password: string(hashed),
+		FirstName: firstName,
+		LastName:  lastName,
+		Email:     email,
+		Password:  string(hashed),
 	}
 
 	if err := s.db.Create(user).Error; err != nil {

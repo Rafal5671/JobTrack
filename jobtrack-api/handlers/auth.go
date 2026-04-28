@@ -27,9 +27,10 @@ func NewAuthHandler(db *gorm.DB, jwtSecret string) *AuthHandler {
 
 // registerRequest holds the validated fields for a registration request.
 type registerRequest struct {
-	Name     string `json:"name" binding:"required,min=2"`
-	Email    string `json:"email" binding:"required,email"`
-	Password string `json:"password" binding:"required,min=8"`
+	FirstName string `json:"first_name" binding:"required,min=2"`
+	LastName  string `json:"last_name" binding:"required,min=2"`
+	Email     string `json:"email" binding:"required,email"`
+	Password  string `json:"password" binding:"required,min=8"`
 }
 
 // loginRequest holds the validated fields for a login request.
@@ -47,7 +48,7 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		return
 	}
 
-	user, err := h.service.Register(req.Name, req.Email, req.Password)
+	user, err := h.service.Register(req.FirstName, req.LastName, req.Email, req.Password)
 	if err != nil {
 		utils.Error(c, http.StatusConflict, err.Error())
 		return

@@ -27,13 +27,10 @@ export default function Layout() {
     navigate("/login");
   };
 
-  const initials =
-    user?.name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2) ?? "?";
+  const initials = [user?.first_name[0], user?.last_name[0]]
+    .filter(Boolean)
+    .join("")
+    .toUpperCase();
 
   return (
     <div className="flex h-screen bg-surface-secondary overflow-hidden">
@@ -81,7 +78,7 @@ export default function Layout() {
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-xs font-medium text-gray-900 truncate">
-              {user?.name}
+              {user?.first_name} {user?.last_name}
             </p>
             <p className="text-xs text-gray-400 truncate">{user?.email}</p>
           </div>

@@ -5,7 +5,8 @@ import { useAuthStore } from "../store/authStore";
 import { register } from "../api/auth";
 
 export default function RegisterPage() {
-  const [name, setName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -19,7 +20,12 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      const { user, token } = await register({ name, email, password });
+      const { user, token } = await register({
+        first_name: firstName,
+        last_name: lastName,
+        email: email,
+        password: password,
+      });
       setAuth(user, token);
       navigate("/board");
     } catch {
@@ -55,22 +61,38 @@ export default function RegisterPage() {
               </div>
             )}
 
-            <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1.5">
-                Full name
-              </label>
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full border border-border rounded-lg px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
-                placeholder="Jan Kowalski"
-                required
-                minLength={2}
-                autoComplete="name"
-              />
+            <div className="flex gap-3">
+              <div className="flex-1">
+                <label className="block text-xs font-medium text-gray-700 mb-1.5">
+                  First name
+                </label>
+                <input
+                  type="text"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  className="w-full border border-border rounded-lg px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                  placeholder="Jan"
+                  required
+                  minLength={2}
+                  autoComplete="given-name"
+                />
+              </div>
+              <div className="flex-1">
+                <label className="block text-xs font-medium text-gray-700 mb-1.5">
+                  Last name
+                </label>
+                <input
+                  type="text"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  className="w-full border border-border rounded-lg px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                  placeholder="Kowalski"
+                  required
+                  minLength={2}
+                  autoComplete="family-name"
+                />
+              </div>
             </div>
-
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1.5">
                 Email
