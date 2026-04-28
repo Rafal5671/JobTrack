@@ -163,23 +163,23 @@ func (s *ContactService) UnlinkFromApplication(contactID, applicationID, userID 
 
 // CreateContactInput holds validated data for creating a new contact.
 type CreateContactInput struct {
-	Name     string `json:"name" binding:"required"`
-	Role     string `json:"role"`
-	Company  string `json:"company"`
-	Email    string `json:"email"`
-	LinkedIn string `json:"linkedin"`
-	Phone    string `json:"phone"`
-	Notes    string `json:"notes"`
+	Name     string `json:"name" binding:"required,min=2,max=100"`
+	Role     string `json:"role" binding:"omitempty,max=100"`
+	Company  string `json:"company" binding:"omitempty,max=100"`
+	Email    string `json:"email" binding:"omitempty,email"`
+	LinkedIn string `json:"linkedin" binding:"omitempty,url"`
+	Phone    string `json:"phone" binding:"omitempty,max=20"`
+	Notes    string `json:"notes" binding:"omitempty,max=1000"`
 }
 
 // UpdateContactInput holds validated data for updating an existing contact.
 // All fields are optional — only non-zero values are applied.
 type UpdateContactInput struct {
-	Name     string `json:"name"`
-	Role     string `json:"role"`
-	Company  string `json:"company"`
-	Email    string `json:"email"`
-	LinkedIn string `json:"linkedin"`
-	Phone    string `json:"phone"`
-	Notes    string `json:"notes"`
+	Name     string `json:"name" binding:"omitempty,min=2,max=100"`
+	Role     string `json:"role" binding:"omitempty,max=100"`
+	Company  string `json:"company" binding:"omitempty,max=100"`
+	Email    string `json:"email" binding:"omitempty,email"`
+	LinkedIn string `json:"linkedin" binding:"omitempty,url"`
+	Phone    string `json:"phone" binding:"omitempty,max=20"`
+	Notes    string `json:"notes" binding:"omitempty,max=1000"`
 }

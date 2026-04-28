@@ -139,22 +139,22 @@ func (s *ApplicationService) Delete(id, userID uint) error {
 
 // CreateApplicationInput holds validated data for creating a new application.
 type CreateApplicationInput struct {
-	Company   string     `json:"company" binding:"required"`
-	Role      string     `json:"role" binding:"required"`
-	Location  string     `json:"location"`
-	Salary    string     `json:"salary"`
-	JobURL    string     `json:"job_url"`
+	Company   string     `json:"company" binding:"required,min=2,max=100"`
+	Role      string     `json:"role" binding:"required,min=2,max=100"`
+	Location  string     `json:"location" binding:"omitempty,max=100"`
+	Salary    string     `json:"salary" binding:"omitempty,max=50"`
+	JobURL    string     `json:"job_url" binding:"omitempty,url"`
 	AppliedAt *time.Time `json:"applied_at"`
 }
 
 // UpdateApplicationInput holds validated data for updating an existing application.
 // All fields are optional — only non-zero values are applied.
 type UpdateApplicationInput struct {
-	Company   string                   `json:"company"`
-	Role      string                   `json:"role"`
-	Status    models.ApplicationStatus `json:"status"`
-	Location  string                   `json:"location"`
-	Salary    string                   `json:"salary"`
-	JobURL    string                   `json:"job_url"`
+	Company   string                   `json:"company" binding:"omitempty,min=2,max=100"`
+	Role      string                   `json:"role" binding:"omitempty,min=2,max=100"`
+	Status    models.ApplicationStatus `json:"status" binding:"omitempty,oneof=saved applied screening interview offer rejected withdrawn"`
+	Location  string                   `json:"location" binding:"omitempty,max=100"`
+	Salary    string                   `json:"salary" binding:"omitempty,max=50"`
+	JobURL    string                   `json:"job_url" binding:"omitempty,url"`
 	AppliedAt *time.Time               `json:"applied_at"`
 }

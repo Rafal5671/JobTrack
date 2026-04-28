@@ -88,10 +88,10 @@ func (s *NoteService) Delete(id, userID uint) error {
 
 // CreateNoteInput holds validated data for creating a new note.
 type CreateNoteInput struct {
-	Content string `json:"content" binding:"required"`
+	Content string `json:"content" binding:"required,min=1,max=5000"`
 }
 
 // UpdateNoteInput holds validated data for updating an existing note.
 type UpdateNoteInput struct {
-	Content string `json:"content" binding:"required"`
+	Content string `json:"content" binding:"required,min=1,max=5000"`
 }

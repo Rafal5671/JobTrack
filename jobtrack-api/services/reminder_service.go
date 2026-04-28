@@ -122,13 +122,13 @@ func (s *ReminderService) Delete(id, userID uint) error {
 
 // CreateReminderInput holds validated data for creating a new reminder.
 type CreateReminderInput struct {
-	Title string    `json:"title" binding:"required"`
+	Title string    `json:"title" binding:"required,min=2,max=200"`
 	DueAt time.Time `json:"due_at" binding:"required"`
 }
 
 // UpdateReminderInput holds validated data for updating an existing reminder.
 // All fields are optional — only non-zero values are applied.
 type UpdateReminderInput struct {
-	Title string    `json:"title"`
+	Title string    `json:"title" binding:"omitempty,min=2,max=200"`
 	DueAt time.Time `json:"due_at"`
 }
