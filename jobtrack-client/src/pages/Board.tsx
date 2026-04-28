@@ -123,9 +123,9 @@ export default function BoardPage() {
       </div>
 
       {/* Kanban board */}
-      <div className="flex-1 overflow-x-auto p-4">
+      <div className="flex-1 overflow-hidden p-4">
         <DragDropContext onDragEnd={handleDragEnd}>
-          <div className="grid grid-cols-7 gap-3 h-full min-w-275">
+          <div className="flex gap-3 h-full overflow-x-auto pb-2">
             {COLUMN_ORDER.map((status) => (
               <KanbanColumn
                 key={status}

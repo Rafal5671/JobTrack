@@ -73,7 +73,7 @@ export default function Layout() {
 
         {/* User section */}
         <div className="px-4 py-3 border-t border-border flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-full bg-brand-100 text-brand-700 text-xs font-medium flex items-center justify-center flex-shrink-0">
+          <div className="w-7 h-7 rounded-full bg-brand-100 text-brand-700 text-xs font-medium flex items-center justify-center shrink-0">
             {initials}
           </div>
           <div className="flex-1 min-w-0">
@@ -92,7 +92,7 @@ export default function Layout() {
         </div>
       </aside>
 
-      <main className="flex-1 overflow-auto">
+      <main className="flex-1 overflow-hidden">
         <Outlet />
       </main>
     </div>

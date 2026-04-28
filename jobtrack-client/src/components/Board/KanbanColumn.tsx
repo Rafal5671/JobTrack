@@ -22,7 +22,7 @@ export default function KanbanColumn({
   const config = COLUMN_CONFIG[status];
 
   return (
-    <div className="flex flex-col bg-surface-secondary rounded-xl p-2.5 min-h-125">
+    <div className="flex flex-col bg-surface-secondary rounded-xl p-2.5 w-64 shrink-0 max-h-full">
       {/* Column header */}
       <div className="flex items-center justify-between px-1 mb-3">
         <div className="flex items-center gap-2">
