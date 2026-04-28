@@ -34,7 +34,7 @@ export default function Layout() {
 
   return (
     <div className="flex h-screen bg-surface-secondary overflow-hidden">
-      <aside className="w-56 bg-surface border-r border-border flex flex-col flex-shrink-0">
+      <aside className="w-56 bg-surface border-r border-border flex flex-col shrink-0">
         {/* Logo */}
         <div className="px-4 py-5 border-b border-border">
           <p className="text-sm font-medium text-gray-900 flex items-center gap-2">
