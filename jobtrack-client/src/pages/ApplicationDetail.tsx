@@ -45,6 +45,7 @@ export default function ApplicationDetailPage() {
   const [noteContent, setNoteContent] = useState("");
   const [reminderTitle, setReminderTitle] = useState("");
   const [reminderDate, setReminderDate] = useState("");
+  const [reminderTime, setReminderTime] = useState("09:00");
   const [editingField, setEditingField] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
 
@@ -103,10 +104,11 @@ export default function ApplicationDetailPage() {
     if (!reminderTitle.trim() || !reminderDate) return;
     await createReminder.mutateAsync({
       title: reminderTitle,
-      due_at: new Date(reminderDate).toISOString(),
+      due_at: new Date(`${reminderDate}T${reminderTime}`).toISOString(),
     });
     setReminderTitle("");
     setReminderDate("");
+    setReminderTime("09:00");
   };
 
   const inputClass =
@@ -315,11 +317,20 @@ export default function ApplicationDetailPage() {
                 className={inputClass}
                 placeholder="Reminder title"
                 required
+                minLength={2}
               />
               <input
-                type="datetime-local"
+                type="date"
                 value={reminderDate}
                 onChange={(e) => setReminderDate(e.target.value)}
+                className={inputClass}
+                required
+                min={new Date().toISOString().slice(0, 10)}
+              />
+              <input
+                type="time"
+                value={reminderTime}
+                onChange={(e) => setReminderTime(e.target.value)}
                 className={inputClass}
                 required
               />
