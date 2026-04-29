@@ -4,6 +4,7 @@ import {
   IconLayoutKanban,
   IconChartBar,
   IconLogout,
+  IconUsers,
 } from "@tabler/icons-react";
 import { useAuthStore } from "../../store/authStore";
 
@@ -16,6 +17,7 @@ interface NavItem {
 const navItems: NavItem[] = [
   { to: "/board", icon: <IconLayoutKanban size={16} />, label: "Board" },
   { to: "/dashboard", icon: <IconChartBar size={16} />, label: "Dashboard" },
+  { to: "/contacts", icon: <IconUsers size={16} />, label: "Contacts" },
 ];
 
 export default function Layout() {

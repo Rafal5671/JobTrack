@@ -5,6 +5,7 @@ import LoginPage from "./pages/Login";
 import RegisterPage from "./pages/Register";
 import BoardPage from "./pages/Board";
 import DashboardPage from "./pages/Dashboard";
+import ContactsPage from "./pages/Contacts";
 import ApplicationDetailPage from "./pages/ApplicationDetail";
 import Layout from "./components/UI/Layout";
 
@@ -64,6 +65,7 @@ export default function App() {
             }
           >
             <Route path="board" element={<BoardPage />} />
+            <Route path="contacts" element={<ContactsPage />} />
             <Route path="dashboard" element={<DashboardPage />} />
             <Route
               path="applications/:id"
