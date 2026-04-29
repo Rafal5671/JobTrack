@@ -33,7 +33,19 @@ export const useAuthStore = create<AuthState>()(
     {
       name: "jobtrack-auth",
       // Only persist user and token — isAuthenticated is derived.
-      partialize: (state) => ({ user: state.user, token: state.token }),
+      partialize: (state) => ({
+        user: state.user,
+        token: state.token,
+        isAuthenticated: state.isAuthenticated,
+      }),
+      // Rehydrate isAuthenticated based on token presence.
+      onRehydrateStorage: () => (state) => {
+        if (state && state.token) {
+          state.isAuthenticated = true;
+        } else if (state) {
+          state.isAuthenticated = false;
+        }
+      },
     },
   ),
 );
