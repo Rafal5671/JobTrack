@@ -4,6 +4,7 @@ package services
 
 import (
 	"errors"
+	"log"
 	"time"
 
 	"jobtrack-api/models"
@@ -15,17 +16,19 @@ import (
 
 // AuthService handles user registration, login and JWT token generation.
 type AuthService struct {
-	db        *gorm.DB
-	jwtSecret string
+	db          *gorm.DB
+	jwtSecret   string
+	mailService *MailService
 }
 
 // NewAuthService creates a new AuthService with the given database and JWT secret.
 func NewAuthService(db *gorm.DB, jwtSecret string) *AuthService {
-	return &AuthService{db: db, jwtSecret: jwtSecret}
+	return &AuthService{db: db, jwtSecret: jwtSecret, mailService: NewMailService()}
 }
 
 // Register creates a new user account after validating that the email is not taken.
 // The password is hashed with bcrypt before being stored.
+// A welcome email is sent asynchronously after successful registration.
 func (s *AuthService) Register(firstName, lastName, email, password string) (*models.User, error) {
 	var existing models.User
 	if err := s.db.Where("email = ?", email).First(&existing).Error; err == nil {
@@ -47,6 +50,13 @@ func (s *AuthService) Register(firstName, lastName, email, password string) (*mo
 	if err := s.db.Create(user).Error; err != nil {
 		return nil, errors.New("failed to create user")
 	}
+
+	// Send welcome email asynchronously – do not block registration on email failure.
+	go func() {
+		if err := s.mailService.SendWelcome(user.Email, user.FirstName); err != nil {
+			log.Printf("Failed to send welcome email to %s: %v", user.Email, err)
+		}
+	}()
 
 	return user, nil
 }
