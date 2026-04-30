@@ -4,7 +4,7 @@ services:
     container_name: jobtrack-postgres
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: yourpassword
+      POSTGRES_PASSWORD: postgres
       POSTGRES_DB: jobtrack
     ports:
       - "5432:5432"
@@ -27,6 +27,7 @@ services:
     build:
       context: ./jobtrack-api
       dockerfile: Dockerfile
+    image: localhost/jobtrack_api
     container_name: jobtrack-api
     env_file:
       - ./jobtrack-api/.env
@@ -47,6 +48,7 @@ services:
     build:
       context: ./jobtrack-client
       dockerfile: Dockerfile
+    image: localhost/jobtrack_client
     container_name: jobtrack-client
     ports:
       - "5173:80"

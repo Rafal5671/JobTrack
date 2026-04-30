@@ -1,4 +1,4 @@
-FROM golang:1.22-alpine AS builder
+FROM docker.io/golang:1.25-alpine AS builder
 
 WORKDIR /app
 
@@ -8,12 +8,13 @@ RUN go mod download
 COPY . .
 RUN go build -o jobtrack .
 
-FROM alpine:latest
+FROM docker.io/alpine:latest
 
 WORKDIR /app
 
 COPY --from=builder /app/jobtrack .
 COPY --from=builder /app/templates ./templates
+COPY .env .env
 
 EXPOSE 8080
 
