@@ -1,5 +1,8 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import {
   IconArrowLeft,
@@ -28,6 +31,24 @@ import {
 import { COLUMN_CONFIG, COLUMN_ORDER } from "../constants/board";
 import type { ApplicationStatus } from "../types";
 
+// Validation schema for the note form.
+const noteSchema = z.object({
+  content: z
+    .string()
+    .min(1, "Note cannot be empty")
+    .max(5000, "Note is too long"),
+});
+
+// Validation schema for the reminder form.
+const reminderSchema = z.object({
+  title: z.string().min(2, "Title must be at least 2 characters"),
+  date: z.string().min(1, "Date is required"),
+  time: z.string().min(1, "Time is required"),
+});
+
+type NoteFormData = z.infer<typeof noteSchema>;
+type ReminderFormData = z.infer<typeof reminderSchema>;
+
 export default function ApplicationDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -42,12 +63,17 @@ export default function ApplicationDetailPage() {
   const createReminder = useCreateReminder(appId);
   const deleteReminder = useDeleteReminder(appId);
 
-  const [noteContent, setNoteContent] = useState("");
-  const [reminderTitle, setReminderTitle] = useState("");
-  const [reminderDate, setReminderDate] = useState("");
-  const [reminderTime, setReminderTime] = useState("09:00");
   const [editingField, setEditingField] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
+
+  const noteForm = useForm<NoteFormData>({
+    resolver: zodResolver(noteSchema),
+  });
+
+  const reminderForm = useForm<ReminderFormData>({
+    resolver: zodResolver(reminderSchema),
+    defaultValues: { time: "09:00" },
+  });
 
   if (isLoading) {
     return (
@@ -91,24 +117,18 @@ export default function ApplicationDetailPage() {
   };
 
   // Add a new note.
-  const handleAddNote = async (e: React.SyntheticEvent) => {
-    e.preventDefault();
-    if (!noteContent.trim()) return;
-    await createNote.mutateAsync({ content: noteContent });
-    setNoteContent("");
+  const handleAddNote = async (data: NoteFormData) => {
+    await createNote.mutateAsync({ content: data.content });
+    noteForm.reset();
   };
 
   // Add a new reminder.
-  const handleAddReminder = async (e: React.SyntheticEvent) => {
-    e.preventDefault();
-    if (!reminderTitle.trim() || !reminderDate) return;
+  const handleAddReminder = async (data: ReminderFormData) => {
     await createReminder.mutateAsync({
-      title: reminderTitle,
-      due_at: new Date(`${reminderDate}T${reminderTime}`).toISOString(),
+      title: data.title,
+      due_at: new Date(`${data.date}T${data.time}`).toISOString(),
     });
-    setReminderTitle("");
-    setReminderDate("");
-    setReminderTime("09:00");
+    reminderForm.reset({ time: "09:00" });
   };
 
   const inputClass =
@@ -117,7 +137,7 @@ export default function ApplicationDetailPage() {
   return (
     <div className="flex flex-col h-full overflow-auto">
       {/* Topbar */}
-      <div className="bg-surface border-b border-border px-6 py-3.5 flex items-center gap-3 hrink-0">
+      <div className="bg-surface border-b border-border px-6 py-3.5 flex items-center gap-3 shrink-0">
         <button
           onClick={() => navigate("/board")}
           className="text-gray-400 hover:text-gray-600 transition-colors"
@@ -154,7 +174,6 @@ export default function ApplicationDetailPage() {
               Details
             </p>
             <div className="space-y-3">
-              {/* Company */}
               <InlineEditField
                 label="Company"
                 value={application.company}
@@ -166,7 +185,6 @@ export default function ApplicationDetailPage() {
                 onEditCancel={handleEditCancel}
                 onEditValueChange={setEditValue}
               />
-              {/* Role */}
               <InlineEditField
                 label="Role"
                 value={application.role}
@@ -178,7 +196,6 @@ export default function ApplicationDetailPage() {
                 onEditCancel={handleEditCancel}
                 onEditValueChange={setEditValue}
               />
-              {/* Location */}
               <div className="flex items-center gap-2 text-sm">
                 <IconMapPin size={14} className="text-gray-400 shrink-0" />
                 <InlineEditField
@@ -193,7 +210,6 @@ export default function ApplicationDetailPage() {
                   onEditValueChange={setEditValue}
                 />
               </div>
-              {/* Salary */}
               <div className="flex items-center gap-2 text-sm">
                 <IconCurrencyDollar
                   size={14}
@@ -211,7 +227,6 @@ export default function ApplicationDetailPage() {
                   onEditValueChange={setEditValue}
                 />
               </div>
-              {/* Job URL */}
               {application.job_url && (
                 <a
                   href={application.job_url}
@@ -223,7 +238,6 @@ export default function ApplicationDetailPage() {
                   View job listing
                 </a>
               )}
-              {/* Dates */}
               <div className="pt-2 border-t border-border text-xs text-gray-400 space-y-1">
                 <p>
                   Added:{" "}
@@ -249,17 +263,29 @@ export default function ApplicationDetailPage() {
             </div>
 
             {/* Add note form */}
-            <form onSubmit={handleAddNote} className="mb-4">
+            <form
+              onSubmit={noteForm.handleSubmit(handleAddNote)}
+              className="mb-4"
+              noValidate
+            >
               <textarea
-                value={noteContent}
-                onChange={(e) => setNoteContent(e.target.value)}
-                className={`${inputClass} resize-none mb-2`}
+                {...noteForm.register("content")}
+                className={`${inputClass} resize-none mb-1 ${
+                  noteForm.formState.errors.content
+                    ? "border-red-300 bg-red-50"
+                    : ""
+                }`}
                 placeholder="Add a note..."
                 rows={3}
               />
+              {noteForm.formState.errors.content && (
+                <p className="text-xs text-red-500 mb-2">
+                  {noteForm.formState.errors.content.message}
+                </p>
+              )}
               <button
                 type="submit"
-                disabled={!noteContent.trim() || createNote.isPending}
+                disabled={createNote.isPending}
                 className="flex items-center gap-1.5 px-3 py-1.5 bg-brand-600 hover:bg-brand-700 disabled:opacity-50 text-white text-xs font-medium rounded-lg transition-colors"
               >
                 <IconPlus size={13} />
@@ -309,38 +335,64 @@ export default function ApplicationDetailPage() {
             </div>
 
             {/* Add reminder form */}
-            <form onSubmit={handleAddReminder} className="space-y-2 mb-4">
-              <input
-                type="text"
-                value={reminderTitle}
-                onChange={(e) => setReminderTitle(e.target.value)}
-                className={inputClass}
-                placeholder="Reminder title"
-                required
-                minLength={2}
-              />
-              <input
-                type="date"
-                value={reminderDate}
-                onChange={(e) => setReminderDate(e.target.value)}
-                className={inputClass}
-                required
-                min={new Date().toISOString().slice(0, 10)}
-              />
-              <input
-                type="time"
-                value={reminderTime}
-                onChange={(e) => setReminderTime(e.target.value)}
-                className={inputClass}
-                required
-              />
+            <form
+              onSubmit={reminderForm.handleSubmit(handleAddReminder)}
+              className="space-y-2 mb-4"
+              noValidate
+            >
+              <div>
+                <input
+                  type="text"
+                  {...reminderForm.register("title")}
+                  className={`${inputClass} ${
+                    reminderForm.formState.errors.title
+                      ? "border-red-300 bg-red-50"
+                      : ""
+                  }`}
+                  placeholder="Reminder title"
+                />
+                {reminderForm.formState.errors.title && (
+                  <p className="text-xs text-red-500 mt-1">
+                    {reminderForm.formState.errors.title.message}
+                  </p>
+                )}
+              </div>
+              <div>
+                <input
+                  type="date"
+                  {...reminderForm.register("date")}
+                  className={`${inputClass} ${
+                    reminderForm.formState.errors.date
+                      ? "border-red-300 bg-red-50"
+                      : ""
+                  }`}
+                  min={new Date().toISOString().slice(0, 10)}
+                />
+                {reminderForm.formState.errors.date && (
+                  <p className="text-xs text-red-500 mt-1">
+                    {reminderForm.formState.errors.date.message}
+                  </p>
+                )}
+              </div>
+              <div>
+                <input
+                  type="time"
+                  {...reminderForm.register("time")}
+                  className={`${inputClass} ${
+                    reminderForm.formState.errors.time
+                      ? "border-red-300 bg-red-50"
+                      : ""
+                  }`}
+                />
+                {reminderForm.formState.errors.time && (
+                  <p className="text-xs text-red-500 mt-1">
+                    {reminderForm.formState.errors.time.message}
+                  </p>
+                )}
+              </div>
               <button
                 type="submit"
-                disabled={
-                  !reminderTitle.trim() ||
-                  !reminderDate ||
-                  createReminder.isPending
-                }
+                disabled={createReminder.isPending}
                 className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 bg-brand-600 hover:bg-brand-700 disabled:opacity-50 text-white text-xs font-medium rounded-lg transition-colors"
               >
                 <IconPlus size={13} />

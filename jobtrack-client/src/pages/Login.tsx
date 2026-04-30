@@ -1,32 +1,45 @@
-import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { IconBriefcase, IconAlertCircle } from "@tabler/icons-react";
 import { useAuthStore } from "../store/authStore";
 import { login } from "../api/auth";
 
+const loginSchema = z.object({
+  email: z.string().min(1, "Email is required").email("Invalid email address"),
+  password: z.string().min(1, "Password is required"),
+});
+
+type LoginFormData = z.infer<typeof loginSchema>;
+
 export default function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
   const { setAuth } = useAuthStore();
   const navigate = useNavigate();
 
-  const handleSubmit = async (e: React.SyntheticEvent) => {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
+  const {
+    register,
+    handleSubmit,
+    setError,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+  });
 
+  const onSubmit = async (data: LoginFormData) => {
     try {
-      const { user, token } = await login({ email, password });
+      const { user, token } = await login(data);
       setAuth(user, token);
       navigate("/board");
     } catch {
-      setError("Invalid email or password");
-    } finally {
-      setLoading(false);
+      setError("root", { message: "Invalid email or password" });
     }
   };
+
+  const inputClass = (hasError: boolean) =>
+    `w-full border rounded-lg px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent ${
+      hasError ? "border-red-300 bg-red-50" : "border-border bg-surface"
+    }`;
 
   return (
     <div className="min-h-screen bg-surface-secondary flex items-center justify-center px-4">
@@ -46,50 +59,63 @@ export default function LoginPage() {
         </div>
 
         <div className="bg-surface border border-border rounded-xl p-6">
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {error && (
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="space-y-4"
+            noValidate
+          >
+            {/* Root error */}
+            {errors.root && (
               <div className="bg-red-50 border border-red-100 rounded-lg px-3 py-2.5 text-sm text-red-600 flex items-center gap-2">
                 <IconAlertCircle size={16} aria-hidden="true" />
-                {error}
+                {errors.root.message}
               </div>
             )}
 
+            {/* Email */}
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1.5">
                 Email
               </label>
               <input
                 type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full border border-border rounded-lg px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                {...register("email")}
+                className={inputClass(!!errors.email)}
                 placeholder="jan@example.com"
-                required
                 autoComplete="email"
               />
+              {errors.email && (
+                <p className="text-xs text-red-500 mt-1">
+                  {errors.email.message}
+                </p>
+              )}
             </div>
 
+            {/* Password */}
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1.5">
                 Password
               </label>
               <input
                 type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full border border-border rounded-lg px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                {...register("password")}
+                className={inputClass(!!errors.password)}
                 placeholder="••••••••"
-                required
                 autoComplete="current-password"
               />
+              {errors.password && (
+                <p className="text-xs text-red-500 mt-1">
+                  {errors.password.message}
+                </p>
+              )}
             </div>
 
             <button
               type="submit"
-              disabled={loading}
+              disabled={isSubmitting}
               className="w-full bg-brand-600 hover:bg-brand-700 disabled:opacity-50 text-white text-sm font-medium py-2 rounded-lg transition-colors"
             >
-              {loading ? "Signing in..." : "Sign in"}
+              {isSubmitting ? "Signing in..." : "Sign in"}
             </button>
           </form>
         </div>

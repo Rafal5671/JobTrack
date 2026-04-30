@@ -143,7 +143,6 @@ export default function BoardPage() {
       {/* Add application modal */}
       {modalOpen && (
         <AddApplicationModal
-          defaultStatus={defaultStatus}
           onClose={() => setModalOpen(false)}
           onSubmit={handleSubmit}
           isLoading={createApplication.isPending}

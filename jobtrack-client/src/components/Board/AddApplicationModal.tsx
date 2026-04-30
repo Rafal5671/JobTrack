@@ -1,9 +1,20 @@
-import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { IconX } from "@tabler/icons-react";
-import type { ApplicationStatus, CreateApplicationInput } from "../../types";
+import type { CreateApplicationInput } from "../../types";
+
+const schema = z.object({
+  company: z.string().min(2, "Company must be at least 2 characters"),
+  role: z.string().min(2, "Role must be at least 2 characters"),
+  location: z.string().max(100, "Location is too long").optional(),
+  salary: z.string().max(50, "Salary is too long").optional(),
+  job_url: z.string().url("Must be a valid URL").optional().or(z.literal("")),
+});
+
+type FormData = z.infer<typeof schema>;
 
 interface AddApplicationModalProps {
-  defaultStatus: ApplicationStatus;
   onClose: () => void;
   onSubmit: (input: CreateApplicationInput) => void;
   isLoading: boolean;
@@ -14,25 +25,28 @@ export default function AddApplicationModal({
   onSubmit,
   isLoading,
 }: AddApplicationModalProps) {
-  const [company, setCompany] = useState("");
-  const [role, setRole] = useState("");
-  const [location, setLocation] = useState("");
-  const [salary, setSalary] = useState("");
-  const [jobUrl, setJobUrl] = useState("");
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<FormData>({
+    resolver: zodResolver(schema),
+  });
 
-  const handleSubmit = (e: React.SyntheticEvent) => {
-    e.preventDefault();
+  const onFormSubmit = (data: FormData) => {
     onSubmit({
-      company,
-      role,
-      location: location || undefined,
-      salary: salary || undefined,
-      job_url: jobUrl || undefined,
+      company: data.company,
+      role: data.role,
+      location: data.location || undefined,
+      salary: data.salary || undefined,
+      job_url: data.job_url || undefined,
     });
   };
 
-  const inputClass =
-    "w-full border border-border rounded-lg px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent bg-surface";
+  const inputClass = (hasError: boolean) =>
+    `w-full border rounded-lg px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent bg-surface ${
+      hasError ? "border-red-300 bg-red-50" : "border-border"
+    }`;
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
@@ -50,37 +64,46 @@ export default function AddApplicationModal({
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-5 space-y-4">
+        <form
+          onSubmit={handleSubmit(onFormSubmit)}
+          className="p-5 space-y-4"
+          noValidate
+        >
+          {/* Company */}
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1.5">
               Company <span className="text-red-400">*</span>
             </label>
             <input
               type="text"
-              value={company}
-              onChange={(e) => setCompany(e.target.value)}
-              className={inputClass}
+              {...register("company")}
+              className={inputClass(!!errors.company)}
               placeholder="Google"
-              required
-              minLength={2}
             />
+            {errors.company && (
+              <p className="text-xs text-red-500 mt-1">
+                {errors.company.message}
+              </p>
+            )}
           </div>
 
+          {/* Role */}
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1.5">
               Role <span className="text-red-400">*</span>
             </label>
             <input
               type="text"
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-              className={inputClass}
+              {...register("role")}
+              className={inputClass(!!errors.role)}
               placeholder="Backend Engineer"
-              required
-              minLength={2}
             />
+            {errors.role && (
+              <p className="text-xs text-red-500 mt-1">{errors.role.message}</p>
+            )}
           </div>
 
+          {/* Location + Salary */}
           <div className="flex gap-3">
             <div className="flex-1">
               <label className="block text-xs font-medium text-gray-700 mb-1.5">
@@ -88,11 +111,15 @@ export default function AddApplicationModal({
               </label>
               <input
                 type="text"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                className={inputClass}
+                {...register("location")}
+                className={inputClass(!!errors.location)}
                 placeholder="Warsaw"
               />
+              {errors.location && (
+                <p className="text-xs text-red-500 mt-1">
+                  {errors.location.message}
+                </p>
+              )}
             </div>
             <div className="flex-1">
               <label className="block text-xs font-medium text-gray-700 mb-1.5">
@@ -100,25 +127,34 @@ export default function AddApplicationModal({
               </label>
               <input
                 type="text"
-                value={salary}
-                onChange={(e) => setSalary(e.target.value)}
-                className={inputClass}
+                {...register("salary")}
+                className={inputClass(!!errors.salary)}
                 placeholder="15 000 PLN"
               />
+              {errors.salary && (
+                <p className="text-xs text-red-500 mt-1">
+                  {errors.salary.message}
+                </p>
+              )}
             </div>
           </div>
 
+          {/* Job URL */}
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1.5">
               Job URL
             </label>
             <input
               type="url"
-              value={jobUrl}
-              onChange={(e) => setJobUrl(e.target.value)}
-              className={inputClass}
+              {...register("job_url")}
+              className={inputClass(!!errors.job_url)}
               placeholder="https://..."
             />
+            {errors.job_url && (
+              <p className="text-xs text-red-500 mt-1">
+                {errors.job_url.message}
+              </p>
+            )}
           </div>
 
           {/* Footer */}

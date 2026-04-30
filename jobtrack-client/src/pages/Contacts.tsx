@@ -1,5 +1,8 @@
 import { useState } from "react";
 import { format } from "date-fns";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   IconPlus,
   IconLoader2,
@@ -18,6 +21,18 @@ import {
 } from "../hooks/useContacts";
 import type { CreateContactInput } from "../types";
 
+const contactSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters"),
+  role: z.string().max(100, "Role is too long").optional(),
+  company: z.string().max(100, "Company is too long").optional(),
+  email: z.string().email("Invalid email address").optional().or(z.literal("")),
+  linkedin: z.string().url("Must be a valid URL").optional().or(z.literal("")),
+  phone: z.string().max(20, "Phone is too long").optional(),
+  notes: z.string().max(1000, "Notes are too long").optional(),
+});
+
+type ContactFormData = z.infer<typeof contactSchema>;
+
 // Add contact modal component.
 function AddContactModal({
   onClose,
@@ -28,29 +43,30 @@ function AddContactModal({
   onSubmit: (input: CreateContactInput) => void;
   isLoading: boolean;
 }) {
-  const [name, setName] = useState("");
-  const [role, setRole] = useState("");
-  const [company, setCompany] = useState("");
-  const [email, setEmail] = useState("");
-  const [linkedin, setLinkedin] = useState("");
-  const [phone, setPhone] = useState("");
-  const [notes, setNotes] = useState("");
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<ContactFormData>({
+    resolver: zodResolver(contactSchema),
+  });
 
-  const handleSubmit = (e: React.SyntheticEvent) => {
-    e.preventDefault();
+  const onFormSubmit = (data: ContactFormData) => {
     onSubmit({
-      name,
-      role: role || undefined,
-      company: company || undefined,
-      email: email || undefined,
-      linkedin: linkedin || undefined,
-      phone: phone || undefined,
-      notes: notes || undefined,
+      name: data.name,
+      role: data.role || undefined,
+      company: data.company || undefined,
+      email: data.email || undefined,
+      linkedin: data.linkedin || undefined,
+      phone: data.phone || undefined,
+      notes: data.notes || undefined,
     });
   };
 
-  const inputClass =
-    "w-full border border-border rounded-lg px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent bg-surface";
+  const inputClass = (hasError: boolean) =>
+    `w-full border rounded-lg px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent bg-surface ${
+      hasError ? "border-red-300 bg-red-50" : "border-border"
+    }`;
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
@@ -68,22 +84,28 @@ function AddContactModal({
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-5 space-y-3">
+        <form
+          onSubmit={handleSubmit(onFormSubmit)}
+          className="p-5 space-y-3"
+          noValidate
+        >
+          {/* Name */}
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1.5">
               Name <span className="text-red-400">*</span>
             </label>
             <input
               type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className={inputClass}
+              {...register("name")}
+              className={inputClass(!!errors.name)}
               placeholder="Anna Kowalska"
-              required
-              minLength={2}
             />
+            {errors.name && (
+              <p className="text-xs text-red-500 mt-1">{errors.name.message}</p>
+            )}
           </div>
 
+          {/* Role + Company */}
           <div className="flex gap-3">
             <div className="flex-1">
               <label className="block text-xs font-medium text-gray-700 mb-1.5">
@@ -91,11 +113,15 @@ function AddContactModal({
               </label>
               <input
                 type="text"
-                value={role}
-                onChange={(e) => setRole(e.target.value)}
-                className={inputClass}
+                {...register("role")}
+                className={inputClass(!!errors.role)}
                 placeholder="HR Manager"
               />
+              {errors.role && (
+                <p className="text-xs text-red-500 mt-1">
+                  {errors.role.message}
+                </p>
+              )}
             </div>
             <div className="flex-1">
               <label className="block text-xs font-medium text-gray-700 mb-1.5">
@@ -103,27 +129,37 @@ function AddContactModal({
               </label>
               <input
                 type="text"
-                value={company}
-                onChange={(e) => setCompany(e.target.value)}
-                className={inputClass}
+                {...register("company")}
+                className={inputClass(!!errors.company)}
                 placeholder="Google"
               />
+              {errors.company && (
+                <p className="text-xs text-red-500 mt-1">
+                  {errors.company.message}
+                </p>
+              )}
             </div>
           </div>
 
+          {/* Email */}
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1.5">
               Email
             </label>
             <input
               type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className={inputClass}
+              {...register("email")}
+              className={inputClass(!!errors.email)}
               placeholder="anna@google.com"
             />
+            {errors.email && (
+              <p className="text-xs text-red-500 mt-1">
+                {errors.email.message}
+              </p>
+            )}
           </div>
 
+          {/* LinkedIn + Phone */}
           <div className="flex gap-3">
             <div className="flex-1">
               <label className="block text-xs font-medium text-gray-700 mb-1.5">
@@ -131,11 +167,15 @@ function AddContactModal({
               </label>
               <input
                 type="url"
-                value={linkedin}
-                onChange={(e) => setLinkedin(e.target.value)}
-                className={inputClass}
+                {...register("linkedin")}
+                className={inputClass(!!errors.linkedin)}
                 placeholder="https://linkedin.com/in/..."
               />
+              {errors.linkedin && (
+                <p className="text-xs text-red-500 mt-1">
+                  {errors.linkedin.message}
+                </p>
+              )}
             </div>
             <div className="flex-1">
               <label className="block text-xs font-medium text-gray-700 mb-1.5">
@@ -143,25 +183,34 @@ function AddContactModal({
               </label>
               <input
                 type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                className={inputClass}
+                {...register("phone")}
+                className={inputClass(!!errors.phone)}
                 placeholder="+48 123 456 789"
               />
+              {errors.phone && (
+                <p className="text-xs text-red-500 mt-1">
+                  {errors.phone.message}
+                </p>
+              )}
             </div>
           </div>
 
+          {/* Notes */}
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1.5">
               Notes
             </label>
             <textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              className={`${inputClass} resize-none`}
+              {...register("notes")}
+              className={`${inputClass(!!errors.notes)} resize-none`}
               placeholder="Additional notes..."
               rows={3}
             />
+            {errors.notes && (
+              <p className="text-xs text-red-500 mt-1">
+                {errors.notes.message}
+              </p>
+            )}
           </div>
 
           {/* Footer */}
