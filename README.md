@@ -37,7 +37,7 @@ JobTrack is a full-stack job search management application that lets you track e
 - Statistics dashboard with bar chart, pie chart and recruitment funnel
 - Form validation with Zod and React Hook Form
 - HTML email templates for welcome and reminder notifications
-- Dockerized full-stack environment with Podman support
+- Dockerized full-stack environment with Docker support
 
 ---
 
